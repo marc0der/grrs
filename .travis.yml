@@ -1,0 +1,52 @@
+language: rust
+sudo: false
+
+cache:
+  directories:
+    - /home/travis/.cargo
+
+GH_TOKEN: &GH_TOKEN
+  secure: fx0rR5Ii1KcsydexE6QpkDbqItNdj3Lt6L5yFZaKKB/ejw9M555NkXA+0GZqV0sLZ54qfR8zTaXAf6eBFKgcG9etaCl7vTXqsvDrlssth82oki1zufP39uuoOy4WgFq8OfACOtUq7opDAgYmpaGzlFiny+c5j7asGwDtAU1Fc3JeJsvAnxHKg9+0spXFD6kBQd5CWpqDXv2rLFK0b8IM2fHAzd0PiJZQWqz//2Cj/r9rTiewtIzqigctAfOgFwYoQvfdM+0mKb4pefG+zXEGfxxQr4r5hqZ6UMO7hto3Jnm9LRjNR8dNaDQCqQ0bkdLTAMTC3nV/gZPM679yQU3KHueVjg9pleNzuKnuBgYmH9+BrlG1dW68kqA+6Xh+wIJYrLuagWhJDlCtiU6PM5QAbFg3mabPIBG3M2IHTrOVATme+iW5vpROARhgjbQEF235DyvZaT+Tml3+PY+PfcRax2DVUhvGQViv4tzppbT0PjjBlEbGct49cFLGdqZIJBiVrYW24I2QkENTnUgZsFIBuJlVCBHZwZlLo9ldVvu4XTMKw65z42zoTzobjtbC1QPEZPiaJXSxC7W569fqL/ORXwGToFk6rQjXwEqDP2okGiusR75LXrZD6qFibNpqeypRFtqOzntsOfTUGrlaN1yTt/6dz0V0j9uI7a9/CHVcblI=
+
+DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
+  before_deploy:
+    - git config --local user.name "Marco Vermeulen"
+    - git config --local user.email "marco@sdkman.io"
+    - name="grrs-$TRAVIS_TAG-$TARGET"
+    - mkdir $name
+    - cp target/$TARGET/release/grrs $name/
+    - tar czvf $name.tar.gz $name
+  deploy:
+    provider: releases
+    api_key: *GH_TOKEN
+    file: grrs-$TRAVIS_TAG-$TARGET.tar.gz
+    skip_cleanup: true
+    on:
+      branch: master
+      tags: true
+
+matrix:
+  include:
+  - name: Tests
+    env: RUST_BACKTRACE=1
+    rust: nightly
+    script:
+    - cargo test --locked
+    - rustup component add rustfmt-preview
+    - cargo fmt --version
+    - cargo fmt --all -- --check
+
+  - name: Linux Binary
+    env: TARGET=x86_64-unknown-linux-gnu
+    rust: nightly
+    before_script: rustup target add $TARGET
+    script: cargo build --release --target $TARGET --locked
+    <<: *DEPLOY_TO_GITHUB
+
+  - name: macOS Binary
+    env: MACOSX_DEPLOYMENT_TARGET=10.7 TARGET=x86_64-apple-darwin
+    os: osx
+    rust: nightly
+    script: cargo build --release --target $TARGET --locked
+    install: true
+    <<: *DEPLOY_TO_GITHUB
