@@ -14,7 +14,7 @@ DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
     - git config --local user.email "marco@sdkman.io"
     - name="grrs-$TRAVIS_TAG-$TARGET"
     - mkdir $name
-    - cp target/$TARGET/release/grrs $name/
+    - cp target/$TARGET/release/grrs* $name/
     - tar czvf $name.tar.gz $name
   deploy:
     provider: releases
