@@ -31,7 +31,7 @@ matrix:
     env: RUST_BACKTRACE=1
     rust: nightly
     script:
-    - cargo test
+    - cargo test --locked
     - rustup component add rustfmt-preview
     - cargo fmt --version
     - cargo fmt --all -- --check
