@@ -51,3 +51,9 @@ matrix:
     install: true
     <<: *DEPLOY_TO_GITHUB
 
+  - name: Windows Binary
+    env: TARGET=x86_64-pc-windows-gnu
+    rust: nightly
+    before_script: cargo install cross
+    script: cross build --release --target $TARGET --locked
+    <<: *DEPLOY_TO_GITHUB
