@@ -33,13 +33,13 @@ matrix:
     env:
       - TARGET=x86_64-unknown-linux-gnu
       - RUST_BACKTRACE=1
-    before_script: rustup target add $TARGET
+    before_script:
+      - rustup target add $TARGET
+      - rustup component add rustfmt-preview
+      - cargo fmt --all -- --check
+      - cargo test --target $TARGET --locked
     script:
-    - rustup component add rustfmt-preview
-    - cargo fmt --version
-    - cargo fmt --all -- --check
-    - cargo test --target $TARGET --locked
-    - cargo build --release --target $TARGET --locked
+      - cargo build --release --target $TARGET --locked
     <<: *DEPLOY_TO_GITHUB
 
   - name: macOS Binary
@@ -48,12 +48,12 @@ matrix:
       - TARGET=x86_64-apple-darwin
       - RUST_BACKTRACE=1
     os: osx
+    before_script:
+      - rustup component add rustfmt-preview
+      - cargo fmt --all -- --check
+      - cargo test --target $TARGET --locked
     script:
-    - rustup component add rustfmt-preview
-    - cargo fmt --version
-    - cargo fmt --all -- --check
-    - cargo test --target $TARGET --locked
-    - cargo build --release --target $TARGET --locked
+      - cargo build --release --target $TARGET --locked
     install: true
     <<: *DEPLOY_TO_GITHUB
 
@@ -61,11 +61,11 @@ matrix:
     env:
       - TARGET=x86_64-pc-windows-gnu
       - RUST_BACKTRACE=1
-    before_script: cargo install --force cross
+    before_script:
+      - cargo install --force cross
+      - rustup component add rustfmt-preview
+      - cross fmt --all -- --check
+      - cross test --target $TARGET --locked
     script:
-    - rustup component add rustfmt-preview
-    - cross fmt --version
-    - cross fmt --all -- --check
-    - cross test --target $TARGET --locked
-    - cross build --release --target $TARGET --locked
+      - cross build --release --target $TARGET --locked
     <<: *DEPLOY_TO_GITHUB
