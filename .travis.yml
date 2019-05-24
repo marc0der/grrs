@@ -1,14 +1,10 @@
 language: rust
+rust: stable
 sudo: false
 
 cache:
   directories:
     - /home/travis/.cargo
-
-env:
-  global:
-    - RUST_BACKTRACE=1
-    - RUST_VERSION=1.35.0
 
 GH_TOKEN: &GH_TOKEN
   secure: VlRSi9Nh9iH6IWuDcwtk0dCveEBOSlcr/Oo6kw12S33Mc81gJjzDlYgWktJXwvx6iaLzuU22rakwMJ7eamiyHiEulWhU+yglDMqVODjGXbJfrwaviAPr4/0apvNY/spxlLcGmYb1zpoEkELHHWaSRtrRG06SSQAONFLWtyxHqreWM7DJ/gNf77kvHLfFrio+Ww1CQNlJP+GRkxdBBZ0QkCJOWAj/KQgSFZNBC98TpWFFClhvZ9GLqjz0kayzhX6XnhnIPd7T9PdQKfNIMWkeM5sziQNY4fPM2j5q4KMqc/dRfwO2GUYrh58dbAq56FBdwyFyYQmtBtx0hTASN686+bpQSXf6Z2TGUnpToo4uyPmZeXvnNwxgbX1BUh5B8i86QIm5cXj5Hu7x4Bwg+CiBgmpRuK80P8Xm3jMe0Naoyb8VEu9Bz4lkhr8C+GevxeNsLA4+5MsUqkOfJPzgykZTiERbmYwrUqbsfCiypePcrm6ezkM98TpRU1qNadu+ZIFAAc02LZ39ZrLdGeOQziE4FcwoOeSweo/Rh/wq2LW8E/sYNZ2pewPXkAcK3hot+gOMLf35p6IUEsAhOKyH/Y0KxXSXmXNmkQSAXBwfHRx/pV+IEZaUDQdMhkrwIjR2jFiC2/DXrpGcFpsqaa1RcugiW6cEljxWc3hsd4fzD7Vcu9w=
@@ -30,12 +26,13 @@ DEPLOY_TO_GITHUB: &DEPLOY_TO_GITHUB
       branch: master
       tags: true
 
-jobs:
+matrix:
   include:
 
   - name: Linux Binary
-    env: TARGET=x86_64-unknown-linux-gnu
-    rust: $RUST_VERSION
+    env:
+      - TARGET=x86_64-unknown-linux-gnu
+      - RUST_BACKTRACE=1
     before_script: rustup target add $TARGET
     script:
     - rustup component add rustfmt-preview
@@ -46,9 +43,11 @@ jobs:
     <<: *DEPLOY_TO_GITHUB
 
   - name: macOS Binary
-    env: MACOSX_DEPLOYMENT_TARGET=10.7 TARGET=x86_64-apple-darwin
+    env:
+      - MACOSX_DEPLOYMENT_TARGET=10.7
+      - TARGET=x86_64-apple-darwin
+      - RUST_BACKTRACE=1
     os: osx
-    rust: $RUST_VERSION
     script:
     - rustup component add rustfmt-preview
     - cargo fmt --version
@@ -59,8 +58,9 @@ jobs:
     <<: *DEPLOY_TO_GITHUB
 
   - name: Windows Binary
-    env: TARGET=x86_64-pc-windows-gnu
-    rust: $RUST_VERSION
+    env:
+      - TARGET=x86_64-pc-windows-gnu
+      - RUST_BACKTRACE=1
     before_script: cargo install --force cross
     script:
     - rustup component add rustfmt-preview
